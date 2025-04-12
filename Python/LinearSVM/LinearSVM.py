@@ -47,14 +47,28 @@ class SVM:
                 return 0
             if self.optimize(i,j):
                 return 1
-            else:
+            else:  
                 for j in np.random.permutation(len(self.alpha)):
                     if j!=i and self.optimize(i,j):
                         return 1
             return 0
     
-    def select_j(i,Ei):
+    def select_j(self,i,Ei):
+        max_diff=0
+        j=-1
+        non_bound=np.where((self.alpha>0)&(self.alpha<self.C))[0]
         
+        candidates=non_bound if len(non_bound)>1 else range(len(self.alpha))
+        for k in candidates:
+            if k==i:
+                continue
+            Ek=self.errors[k]
+            diff=abs(Ei-Ek)
+            if(diff>max_diff):
+                max_diff=diff
+                j=k
+        return j if j!=-1 else None
+            
     
     def optimize(i,j):
         
