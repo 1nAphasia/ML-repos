@@ -37,13 +37,15 @@ def show_images(img, num_rows, num_cols, titles=None, scale=1.5):
     _, axes = d2l.plt.subplots(num_rows, num_cols, figsize=figsize)
     axes = axes.flatten()
     for i, (ax, img) in enumerate(zip(axes, img)):
-        ax.imshow(img.numpy())
-    else:
-        ax.imshow(img)
-    ax.axes.get_xaxis().set_visible(False)
-    ax.axes.get_yaxis().set_visible(False)
-    if titles:
-        ax.set_title(titles[i])
+        if torch.is_tensor(img):
+            ax.imshow(img.numpy())
+        else:
+            ax.imshow(img)
+        ax.axes.get_xaxis().set_visible(False)
+        ax.axes.get_yaxis().set_visible(False)
+        if titles:
+            ax.set_title(titles[i])
+    d2l.plt.show()
     return axes
 
 
