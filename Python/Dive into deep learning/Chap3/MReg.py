@@ -22,9 +22,11 @@ labels += np.random.normal(scale=0.1, size=labels.shape)
 def evaluate_loss(net, data_iter, loss):
     metric = d2l.Accumulator(2)
     for X, y in data_iter:
-        l = loss(net(X), y)
-        metric.add(l.sum(), d2l.size())
-        return metric[0] / metric[1]
+        out = net(X)
+        y.reshape(out.shape)
+        l = loss(out, y)
+        metric.add(l.sum(), l.numel())
+    return metric[0] / metric[1]
 
 
 def train(train_features, test_features, train_labels, test_labels, num_epochs=400):
@@ -34,10 +36,19 @@ def train(train_features, test_features, train_labels, test_labels, num_epochs=4
     net = nn.Sequential(nn.Linear(input_shape, 1, bias=False))
     batch_size = min(10, train_labels.shape[0])
     train_iter = d2l.load_array(
-        (train_features, train_labels.reshape(-1, 1)), batch_size
+        (
+            torch.as_tensor(train_features, dtype=torch.float32),
+            torch.as_tensor(train_labels.reshape(-1, 1), dtype=torch.float32),
+        ),
+        batch_size,
     )
     test_iter = d2l.load_array(
-        (test_features, test_labels.reshape(-1, 1)), batch_size, is_train=False
+        (
+            torch.as_tensor(test_features, dtype=torch.float32),
+            torch.as_tensor(test_labels.reshape(-1, 1), dtype=torch.float32),
+        ),
+        batch_size,
+        is_train=False,
     )
     trainer = torch.optim.SGD(net.parameters(), lr=0.01)
     animator = d2l.Animator(
