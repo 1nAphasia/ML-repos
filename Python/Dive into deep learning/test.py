@@ -1,4 +1,3 @@
-import d2l
+import random
 
-print(d2l.__version__)
-print(dir(d2l))
+print(f"random.randint(0,99):{random.randint(0,99)}")
