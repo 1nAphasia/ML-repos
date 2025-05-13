@@ -44,9 +44,9 @@ conv_arch = ((2, 64), (2, 128), (3, 256), (3, 256), (3, 256))
 
 def vgg(conv_arch):
     net = []
-    in_channels = 1
+    in_channels = 3
     for num_convs, out_channels in conv_arch:
-        net.append(VGG_block((in_channels, out_channels, num_convs)))
+        net.append(VGG_block(in_channels, out_channels, num_convs))
         in_channels = out_channels
     return nn.Sequential(
         *net,
@@ -62,10 +62,6 @@ def vgg(conv_arch):
 
 
 net = vgg()
-
-for blk in net:
-    X = blk(X)
-    print(blk.__class__.__name__, "output shape:\t", X.shape)
 
 
 lr, num_epochs, batch_size = 0.1, 10, 8
@@ -88,8 +84,15 @@ for epoch in range(num_epochs):
 
     print(f"Epoch {epoch + 1}/{num_epochs}, Loss: {loss.item():.4f}")
 
+torch.save(net.state_dict(), "vgg_model.pth")
+
 net.eval()
 with torch.no_grad():
     for batch in test_loader:
         inputs, labels = batch
+        inputs, labels = inputs.to(device), labels.to(device)
         outputs = net(inputs)
+        _, predicted = torch.max(outputs, 1)
+        correct += (predicted == labels).sum().item()
+        total += labels.size(0)
+        print(f"Test Accuracy:{correct/total:.2%}")
